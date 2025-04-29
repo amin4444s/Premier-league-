@@ -1,0 +1,96 @@
+
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <title>نرخ دلار</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: linear-gradient(to bottom right, #c2f0c2, #a0e0ff);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+      direction: rtl;
+    }
+    .card {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      text-align: center;
+      min-width: 250px;
+      margin-bottom: 2rem;
+    }
+    .price {
+      font-size: 3rem;
+      margin: 1rem 0;
+      color: #333;
+    }
+    canvas {
+      max-width: 600px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>نرخ دلار</h1>
+    <div class="price" id="price">...</div>
+  </div>
+
+  <canvas id="priceChart"></canvas>
+
+  <script>
+    let price;
+    const storedPrice = localStorage.getItem('fakeDollarPrice');
+    price = storedPrice ? parseFloat(storedPrice) : 10000;
+
+    const priceEl = document.getElementById('price');
+    priceEl.textContent = price.toFixed(2);
+
+    const prices = [price];
+    const labels = [new Date().toLocaleTimeString()];
+
+    const ctx = document.getElementById('priceChart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'قیمت دلار',
+          data: prices,
+          borderColor: '#007bff',
+          fill: false,
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: { beginAtZero: false }
+        }
+      }
+    });
+
+    function updatePrice() {
+      const change = (Math.random() - 0.5) * 1000;
+      price = Math.max(0, price + change);
+      priceEl.textContent = price.toFixed(2);
+      localStorage.setItem('fakeDollarPrice', price.toFixed(2));
+
+      if (labels.length > 15) {
+        labels.shift();
+        prices.shift();
+      }
+      labels.push(new Date().toLocaleTimeString());
+      prices.push(price);
+      chart.update();
+    }
+
+    setInterval(updatePrice, 2000);
+  </script>
+</body>
+</html>
